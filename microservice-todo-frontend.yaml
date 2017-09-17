@@ -1,0 +1,69 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: microservices-todo-frontend
+  labels:
+    k8s-app: microservices-todo-frontend
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: microservices-todo-frontend
+    spec:
+      containers:
+      - name: todo-frontend
+        image: gustavoapolinario/microservices-node-todo-frontend
+        livenessProbe:
+          httpGet:
+            path: /health_check
+            port: node-port
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        ports:
+        - name: node-port
+          containerPort: 3000
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        env:
+          - name: TODO_BACKEND
+            value: microservices-todo-backend
+          - name: TODO_BACKEND_PORT
+            value: "3001"
+          - name: PORT
+            value: "3000"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservices-todo-frontend
+  labels:
+    k8s-app: microservices-todo-frontend
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: node-port
+    protocol: TCP
+  selector:
+    k8s-app: microservices-todo-frontend
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: microservices-todo-frontend
+spec:
+  rules:
+  - host: myminikube.info
+    http:
+      paths:
+      - path: /todo
+        backend:
+          serviceName: microservices-todo-frontend
+          servicePort: 80

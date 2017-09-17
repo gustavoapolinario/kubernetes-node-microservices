@@ -1,0 +1,40 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: microservices-mongodb
+  labels:
+    k8s-app: microservices-mongodb
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: microservices-mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo
+        ports:
+        - name: mongodb-port
+          containerPort: 27017
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservices-mongodb
+  labels:
+    k8s-app: microservices-mongodb
+spec:
+  type: NodePort
+  ports:
+    - port: 27017 
+      targetPort: mongodb-port
+  selector:
+    k8s-app: microservices-mongodb

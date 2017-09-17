@@ -1,0 +1,62 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: microservices-static
+  labels:
+    k8s-app: microservices-static
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: microservices-static
+    spec:
+      containers:
+      - name: static-files
+        image: gustavoapolinario/microservices-static-files
+        livenessProbe:
+          httpGet:
+            path: /static/healthcheck.html
+            port: http-port
+            scheme: HTTP
+          initialDelaySeconds: 10
+          timeoutSeconds: 5
+        ports:
+        - name: http-port
+          containerPort: 80
+        resources:
+          limits:
+            cpu: 200m
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservices-static
+  labels:
+    k8s-app: microservices-static
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    targetPort: http-port
+    protocol: TCP
+  selector:
+    k8s-app: microservices-static
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: microservices-static
+spec:
+  rules:
+  - host: myminikube.info
+    http:
+      paths:
+      - path: /static
+        backend:
+          serviceName: microservices-static
+          servicePort: 80

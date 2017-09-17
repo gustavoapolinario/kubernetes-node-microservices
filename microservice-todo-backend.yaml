@@ -1,0 +1,54 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: microservices-todo-backend
+  labels:
+    k8s-app: microservices-todo-backend
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: microservices-todo-backend
+    spec:
+      containers:
+      - name: todo-backend
+        image: gustavoapolinario/microservices-node-todo-frontend
+        livenessProbe:
+          httpGet:
+            path: /health_check
+            port: node-port
+            scheme: HTTP
+          initialDelaySeconds: 30
+          timeoutSeconds: 5
+        ports:
+        - name: node-api-port
+          containerPort: 3001
+        resources:
+          limits:
+            cpu: 500m
+            memory: 500Mi
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        env:
+          - name: MONGODB
+            value: microservices-mongodb
+          - name: MONGODB_PORT
+            value: "27017"
+          - name: PORT
+            value: "3001"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: microservices-todo-backend
+  labels:
+    k8s-app: microservices-todo-backend
+spec:
+  type: NodePort
+  ports:
+    - port: 3001 
+      targetPort: node-api-port
+  selector:
+    k8s-app: microservices-todo-backend
