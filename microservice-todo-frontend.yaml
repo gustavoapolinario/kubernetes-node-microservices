@@ -60,7 +60,7 @@ metadata:
   name: microservices-todo-frontend
 spec:
   rules:
-  - host: myminikube.info
+  - host:
     http:
       paths:
       - path: /todo

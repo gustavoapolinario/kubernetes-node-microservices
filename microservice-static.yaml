@@ -53,7 +53,7 @@ metadata:
   name: microservices-static
 spec:
   rules:
-  - host: myminikube.info
+  - host:
     http:
       paths:
       - path: /static

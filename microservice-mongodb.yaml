@@ -38,3 +38,4 @@ spec:
       targetPort: mongodb-port
   selector:
     k8s-app: microservices-mongodb
+    

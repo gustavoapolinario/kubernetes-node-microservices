@@ -2,30 +2,30 @@ apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
   labels:
-    run: haproxy-ingress
+    k8s-app: haproxy-ingress
   name: haproxy-ingress
 spec:
   selector:
     matchLabels:
-      run: haproxy-ingress
+      k8s-app: haproxy-ingress
   template:
     metadata:
       labels:
-        run: haproxy-ingress
+        k8s-app: haproxy-ingress
     spec:
       containers:
       - name: haproxy-ingress
         image: quay.io/jcmoraisjr/haproxy-ingress
         args:
-        - --default-backend-service=$(POD_NAMESPACE)/default-http-backend
+        - --default-backend-service=default/default-http-backend
 #        - --default-ssl-certificate=$(POD_NAMESPACE)/tls-secret
-        - --configmap=$(POD_NAMESPACE)/haproxy-ingress
+        - --configmap=default/haproxy-ingress
         ports:
-        - name: http
+        - name: http-port
           containerPort: 80
-        - name: https
+        - name: https-port
           containerPort: 443
-        - name: stat
+        - name: stat-port
           containerPort: 1936
         env:
         - name: POD_NAME
@@ -36,3 +36,18 @@ spec:
           valueFrom:
             fieldRef:
               fieldPath: metadata.namespace
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: haproxy-ingress
+  labels:
+    k8s-app: haproxy-ingress
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: http-port
+    protocol: TCP
+  selector:
+    k8s-app: haproxy-ingress
