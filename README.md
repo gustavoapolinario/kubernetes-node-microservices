@@ -95,7 +95,9 @@ kops update cluster k8smicroservice.tk --yes
 ```
 Now, you need config route53 or someelse to access loadbalance
 
-Delete cluster
+
+
+At last, to finish your tests, Delete cluster
 ```
 kops delete cluster --name=k8smicroservice.tk
 ```
